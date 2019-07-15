@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qf.mapper.LeaveMapper">
+<insert id="addLeave" parameterType="com.qf.pojo.Leave" useGeneratedKeys="true" keyProperty="lid">
+    insert into leave(uid,startDate,endDate,reason,state) value(#{leave.user.uid},#{leave.startDate},#{leave.endDate},#{leave.reason},#{leave.state})
+</insert>
+
+    <select id="queryLeaveListByUid" parameterType="int" resultType="com.qf.pojo.Leave">
+        select * from leave where uid = #{uid}
+    </select>
+
+    <resultMap id="leaveMap" type="com.qf.pojo.Leave">
+        <id property="lid" column="lid"/>
+        <result property="startDate" column="startDate"/>
+        <result property="endDate" column="endDate"/>
+        <result property="reason" column="reason"/>
+        <result property="state" column="state"/>
+        <association property="user" column="uid" javaType="com.qf.pojo.User">
+            <id property="uid" column="uid"/>
+            <result property="username" column="username"/>
+        </association>
+    </resultMap>
+
+    <select id="queryLeaveListByState" parameterType="int" resultMap="leaveMap">
+        select lid,startDate,endDate,reason,state,users.uid,username from users,leave where users.uid = leave.uid and state = #{apply_leave}
+    </select>
+
+    <update id="updateLeaveByLid" parameterType="int">
+        update leave set state=1 where lid = #{lid}
+    </update>
+
+
+</mapper>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!--扫描service和tx事务管理-->
+    <!--扫描包将注解的service控制反转-->
+    <context:component-scan base-package="com.qf.service,com.qf.advice"/>
+
+    <bean id="trainscationManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <tx:advice id="advice" transaction-manager="trainscationManager">
+        <tx:attributes>
+            <tx:method name="find*" propagation="SUPPORTS" read-only="true" timeout="10"/>
+            <tx:method name="*" propagation="REQUIRED" read-only="false" timeout="10" />
+        </tx:attributes>
+    </tx:advice>
+
+    <aop:config>
+        <aop:pointcut id="pc" expression="execution(* com..service.*Impl.*(..))"/>
+        <aop:pointcut id="logpc" expression="execution(* com..service.*Impl.*(..))"/>
+        <aop:advisor advice-ref="advice" pointcut-ref="pc"></aop:advisor>
+        <aop:aspect ref="logAdvice">
+            <aop:before method="before" pointcut-ref="logpc"/>
+            <aop:after method="after" pointcut-ref="logpc"/>
+            <aop:after-throwing method="afterThrowing" pointcut-ref="logpc" throwing="throwable"/>
+        </aop:aspect>
+    </aop:config>
+</beans>
